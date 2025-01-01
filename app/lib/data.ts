@@ -14,12 +14,13 @@ export async function fetchRevenue() {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
+    console.log('Fetching revenue data...');
+
     const testr = await db.connect();
     const data = await testr.sql<Revenue>`SELECT * FROM revenue`;
     testr.release();
 
-    // console.log('Data fetch completed after 3 seconds.');
+    console.log('Data fetch completed after 3 seconds.');
 
     return data.rows;
   } catch (error) {
@@ -30,6 +31,7 @@ export async function fetchRevenue() {
 
 export async function fetchLatestInvoices() {
   try {
+
     const testr = await db.connect();
     const data = await testr.sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
