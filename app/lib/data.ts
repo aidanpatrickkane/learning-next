@@ -97,7 +97,8 @@ export async function fetchFilteredInvoices(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const invoices = await sql<InvoicesTable>`
+    const testr = await db.connect();
+    const invoices = await testr.sql<InvoicesTable>`
       SELECT
         invoices.id,
         invoices.amount,
@@ -117,6 +118,7 @@ export async function fetchFilteredInvoices(
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
+    testr.release();
 
     return invoices.rows;
   } catch (error) {
@@ -127,7 +129,8 @@ export async function fetchFilteredInvoices(
 
 export async function fetchInvoicesPages(query: string) {
   try {
-    const count = await sql`SELECT COUNT(*)
+    const testr = await db.connect();
+    const count = await testr.sql`SELECT COUNT(*)
     FROM invoices
     JOIN customers ON invoices.customer_id = customers.id
     WHERE
@@ -137,6 +140,7 @@ export async function fetchInvoicesPages(query: string) {
       invoices.date::text ILIKE ${`%${query}%`} OR
       invoices.status ILIKE ${`%${query}%`}
   `;
+    testr.release();
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
@@ -148,7 +152,8 @@ export async function fetchInvoicesPages(query: string) {
 
 export async function fetchInvoiceById(id: string) {
   try {
-    const data = await sql<InvoiceForm>`
+    const testr = await db.connect();
+    const data = await testr.sql<InvoiceForm>`
       SELECT
         invoices.id,
         invoices.customer_id,
@@ -157,6 +162,7 @@ export async function fetchInvoiceById(id: string) {
       FROM invoices
       WHERE invoices.id = ${id};
     `;
+    testr.release();
 
     const invoice = data.rows.map((invoice) => ({
       ...invoice,
@@ -173,13 +179,15 @@ export async function fetchInvoiceById(id: string) {
 
 export async function fetchCustomers() {
   try {
-    const data = await sql<CustomerField>`
+    const testr = await db.connect();
+    const data = await testr.sql<CustomerField>`
       SELECT
         id,
         name
       FROM customers
       ORDER BY name ASC
     `;
+    testr.release();
 
     const customers = data.rows;
     return customers;
@@ -191,7 +199,8 @@ export async function fetchCustomers() {
 
 export async function fetchFilteredCustomers(query: string) {
   try {
-    const data = await sql<CustomersTableType>`
+    const testr = await db.connect();
+    const data = await testr.sql<CustomersTableType>`
 		SELECT
 		  customers.id,
 		  customers.name,
@@ -208,6 +217,7 @@ export async function fetchFilteredCustomers(query: string) {
 		GROUP BY customers.id, customers.name, customers.email, customers.image_url
 		ORDER BY customers.name ASC
 	  `;
+    testr.release();
 
     const customers = data.rows.map((customer) => ({
       ...customer,
